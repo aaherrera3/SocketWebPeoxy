@@ -46,23 +46,30 @@ while 1:
 
             sock = socket(AF_INET, SOCK_STREAM)
 
-            host = fileName.replace("www.","",1)
+            host = "www."+fileName
             print("Host: ", host, "\n")
 
             try:
-                sock.connect((host,80))
-                web_request = "GET / HTTP/1.1\nHost: "+host+"\n\n"
-                sock.send(web_request.encode())
-                result = sock.recv(4096)
-                fileTemp = open("./"+fileName,"wb")
-                for line in result:
-                    fileTemp.write(line)
+                print("inside try 2\n")
+                sock.connect((host, 80))
+                print(sock)
+                filemake = sock.makefile('r',0)
+                print("after filemake")
+                filemake.write("GET "+"http://" + filename + " HTTP/1.0\n\n")
+                print("after filemake write")
+                buff = filemake.readlines()
+                print("buff",buff,"\n")
+                tempFile = open("./"+fileName,"wb")
+                for line in buff:
+                    print(line)
                     conn.send(line)
-            except:
+            except :
                 print("Illegal Request")
         else:
             conn.send("HTTP/1.0 404 sendErrorErrorError\r\n")                             
             conn.send("Content-Type:text/html\r\n")
             conn.send("\r\n")
-    break
+    #Close the client and the server sockets    
+    conn.close() 
+tcpSerSock.close()
     
