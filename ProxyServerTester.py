@@ -14,50 +14,55 @@ while 1:
     conn, addr = proxySocket.accept()
 
     print('Received a connection from:', addr,'\n')
-
     request = conn.recv(1024).decode()
-
     print(request)
-    print('+++++++++++++++++++++++++++++++++++')
+
     fileName = request.split()[1].partition("/")[2]
-    
+    print("File Name: ",fileName,"\n")
+
     fileExist = False
 
-    filetouse = "/"+fileName
-
-    print(filetouse)
+    fileToUse = "/"+fileName
+    print("File To use: ",fileToUse,"\n")
 
     try:
-        f = open(filetouse[1:], "r")
-        outputdata = f.readlines()
+        print("Inside try: ", fileToUse[1:],"\n")
+        f = open(fileToUse[1:],"r")
+        outputData = f.readlines()
+
         fileExist = True
-        Print("Requested file found in cache:", filetouse)
-        proxySocket.send("HTTP/1.0 200 OK\r\n")            
-        proxySocket.send("Content-Type:text/html\r\n")
-        for i in range(0, len(outputdata)):             
-            proxySocket.send(outputdata[i])
+
+        print("Requested file found in cache:", fileToUse)
+
+        conn.send("HTTP/1.0 200 OK\r\n")
+        conn.send("Content-Type:text/html\r\n")
+        for i in range(0, len(outputData)):
+            conn.send(outputData[i])
             print('Read from cache')
+
     except IOError:
         if not fileExist:
-            print("Requested file not found in cache, performing Get to server for file:", filetouse)
+            print("Requested file NOT found in cache, perform GET to server for file:",fileToUse,"\n")
+
             sock = socket(AF_INET, SOCK_STREAM)
+
             host = fileName.replace("www.","",1)
-            print(host)
+            print("Host: ", host, "\n")
+
             try:
                 sock.connect((host,80))
-                fileMake = scok.makefile('r',0)
-                fileMake.write("GET "+"http://" + fileName + " HTTP/1.0\n\n")
-                buffer = fileMake.readlines()
-                tempFile = open("./"+fileName, "wb")
-                for line in buffer:
-                    tempFile.write(line)
-                    proxySocket.send(line)
+                web_request = "GET / HTTP/1.1\nHost: "+host+"\n\n"
+                sock.send(web_request.encode())
+                result = sock.recv(4096)
+                fileTemp = open("./"+fileName,"wb")
+                for line in result:
+                    fileTemp.write(line)
+                    conn.send(line)
             except:
-                print("Illegal request")
+                print("Illegal Request")
         else:
-            proxySocket.send("HTTP/1.0 404 sendErrorErrorError\r\n")                             
-            proxySocket.send("Content-Type:text/html\r\n")
-            proxySocket.send("\r\n")
-        break
-
+            conn.send("HTTP/1.0 404 sendErrorErrorError\r\n")                             
+            conn.send("Content-Type:text/html\r\n")
+            conn.send("\r\n")
+    break
     
