@@ -55,11 +55,11 @@ while 1:
                 sock.send(request.encode())
                 buffer = sock.recv(4096)
 
-                # tempFile = open("./"+fileName,"wb")
+                tempFile = open("./"+fileName,"wb")
 
                 while (len(buffer) > 0):
                     # print(buffer.decode())
-                    # tempFile.write(buffer)
+                    tempFile.write(buffer)
                     conn.send(buffer)
                     buffer = sock.recv(4096)
                 
@@ -74,7 +74,7 @@ while 1:
             conn.send(b"Content-Type:text/html\r\n")
             conn.send(b"\r\n")
     #Close the client and the server sockets
-    break    
-#     conn.close() 
-# tcpSerSock.close()
+    # break    
+    conn.close() 
+tcpSerSock.close()
     
