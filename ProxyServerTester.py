@@ -34,8 +34,8 @@ while 1:
 
         print("Requested file found in cache:", fileToUse)
 
-        conn.send("HTTP/1.0 200 OK\r\n")
-        conn.send("Content-Type:text/html\r\n")
+        conn.send(b"HTTP/1.0 200 OK\r\n")
+        conn.send(b"Content-Type:text/html\r\n")
         for i in range(0, len(outputData)):
             conn.send(outputData[i])
             print('Read from cache')
@@ -50,26 +50,31 @@ while 1:
             print("Host: ", host, "\n")
 
             try:
-                print("inside try 2\n")
-                sock.connect((host, 80))
-                print(sock)
-                filemake = sock.makefile('r',0)
-                print("after filemake")
-                filemake.write("GET "+"http://" + filename + " HTTP/1.0\n\n")
-                print("after filemake write")
-                buff = filemake.readlines()
-                print("buff",buff,"\n")
-                tempFile = open("./"+fileName,"wb")
-                for line in buff:
-                    print(line)
-                    conn.send(line)
+                sock.connect((host,80))
+                request = "GET "+"http://" + host + "/ HTTP/1.0\r\n\r\n"
+                sock.send(request.encode())
+                buffer = sock.recv(4096)
+
+                # tempFile = open("./"+fileName,"wb")
+
+                while (len(buffer) > 0):
+                    # print(buffer.decode())
+                    # tempFile.write(buffer)
+                    conn.send(buffer)
+                    buffer = sock.recv(4096)
+                
+                # tempFile = open("./"+fileName,"wb")
+                # for line in buff:
+                #     print(line)
+                #     conn.send(line)
             except :
                 print("Illegal Request")
         else:
-            conn.send("HTTP/1.0 404 sendErrorErrorError\r\n")                             
-            conn.send("Content-Type:text/html\r\n")
-            conn.send("\r\n")
-    #Close the client and the server sockets    
-    conn.close() 
-tcpSerSock.close()
+            conn.send(b"HTTP/1.0 404 sendErrorErrorError\r\n")                             
+            conn.send(b"Content-Type:text/html\r\n")
+            conn.send(b"\r\n")
+    #Close the client and the server sockets
+    break    
+#     conn.close() 
+# tcpSerSock.close()
     
